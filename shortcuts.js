@@ -1,16 +1,33 @@
 $(function() {
     console.log("c'est parti!");
     const $result = $('#result');
-    // J'observe les keyup sur mon document
+
+    const $wiki_search = $('#wiki_search');
+
     let keyups = Rx.Observable.fromEvent(document.body, 'keyup')
-        // Plutot que de filtrer sur tout l'event, je ne filtre que sur la
-        // propriete key
-        .pluck('key')
-        .filter(key => key === 'f' )
-        // Je m'abonne pour declencher des comportements
-        .subscribe(
-            () => requestFullScreen()
-        )
+        .pluck('key');
+
+
+    keyups.filter(key => key === 'f' )
+    .subscribe(() => requestFullScreen());
+
+    // Capture des event par groupe de deux
+    keyups.windowWithCount(2, 1)
+    .selectMany(x => x.toArray())
+    // on ne cherche que la séquence sw
+    .filter(x => x[0] === 's' && x[1] === 'w')
+    // on affiche le champ de recherche
+    .subscribe(function() {
+        console.log('Tu as pressé la séquance sw');
+        $wiki_search.show();
+    });
+
+    // on ajoute également un comportement sur la touche Escape
+    keyups.filter(k => k === 'Escape')
+    .subscribe(function() { 
+        console.log('tu as pressé echap');
+        $wiki_search.hide();
+    });
 
     function requestFullScreen() {
         if (document.documentElement.mozRequestFullScreen) {
